@@ -3,27 +3,64 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { auth, db, logout } from "./firebase";
 import { query, collection, getDocs, where } from "firebase/firestore";
-import { Button, Container, Typography, Paper, Box } from "@material-ui/core";
+import { deepOrange } from '@material-ui/core/colors';
+import {
+  AppBar,
+  Toolbar,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  IconButton,
+  Avatar,
+  Button,
+  Typography,
+  Box,
+  Container,
+  Paper,
+} from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
-
-import Particles from "react-tsparticles";
-import { loadFull } from "tsparticles";
-import { useCallback } from "react";
-
 const useStyles = makeStyles((theme) => ({
-  container: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    padding: theme.spacing(3),
+  root: {
+    display: 'flex',
+    height: '100vh',
+    backgroundColor: '#F7F7F7', // Light gray for main background
   },
-  paper: {
-    padding: theme.spacing(3),
-    width: "100%",
-    marginBottom: theme.spacing(2),
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+    backgroundColor: '#2E2E2E', // Dark gray for AppBar
   },
-  button: {
-    marginTop: theme.spacing(2),
+  drawer: {
+    width: 240,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: 240,
+    backgroundColor: '#2E2E2E', // Dark gray for left menu bar
+    color: '#FFFFFF', // White text for better contrast against dark background
+  },
+  drawerContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between', // Adjust the content to be between top and bottom
+    height: '100%', // Take the full height of the parent container
+    marginTop: 64, // Leave space for the app bar
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing(3),
+    backgroundColor: '#F7F7F7', // Light gray for main content background
+  },
+  avatar: {
+    marginLeft: 'auto',
+  },
+  logoutButton: {
+    backgroundColor: deepOrange[500], // Using a subtle accent color for the Logout button
+    '&:hover': {
+      backgroundColor: deepOrange[700],
+    },
+    marginBottom: 16,
   },
 }));
 
@@ -32,71 +69,6 @@ function Dashboard() {
   const [user, loading] = useAuthState(auth);
   const [name, setName] = useState("");
   const navigate = useNavigate();
-  const options = {
-    particles: {
-      number: {
-        value: 80,
-        density: {
-          enable: true,
-          area: 800,
-        },
-      },
-      color: {
-        value: ["#2EB67D", "#ECB22E", "#E01E5B", "#36C5F0"],
-      },
-      shape: {
-        type: "circle",
-      },
-      opacity: {
-        value: 1,
-      },
-      size: {
-        value: { min: 1, max: 8 },
-      },
-      links: {
-        enable: true,
-        distance: 150,
-        color: "#808080",
-        opacity: 0.4,
-        width: 1,
-      },
-      move: {
-        enable: true,
-        speed: 2,
-        direction: "none",
-        random: false,
-        straight: false,
-        outModes: "out",
-      },
-    },
-    interactivity: {
-      events: {
-        onHover: {
-          enable: true,
-          mode: "grab",
-        },
-        onClick: {
-          enable: true,
-          mode: "push",
-        },
-      },
-      modes: {
-        grab: {
-          distance: 140,
-          links: {
-            opacity: 1,
-          },
-        },
-        push: {
-          quantity: 4,
-        },
-      },
-    },
-  };
-
-  const particlesInit = useCallback(async (engine) => {
-    await loadFull(engine);
-  }, []);
 
   const fetchUserName = async () => {
     try {
@@ -117,30 +89,72 @@ function Dashboard() {
   }, [user, loading]);
 
   return (
-    <>
-      <Particles options={options} init={particlesInit} />
-      <Container className={classes.container} maxWidth="sm">
-        <Paper className={classes.paper} elevation={3}>
-          <Typography variant="h6">Logged in as</Typography>
-          <Box mt={2}>
-            <Typography variant="body1">
-              <strong>Name:</strong> {name}
-            </Typography>
-            <Typography variant="body1">
-              <strong>Email:</strong> {user?.email}
-            </Typography>
-          </Box>
+    <div className={classes.root}>
+      <AppBar position="fixed" className={classes.appBar}>
+        <Toolbar variant="regular" >
+          <IconButton edge="start" color="primary" aria-label="menu">
+            {/* Add menu icon here */}
+          </IconButton>
+          <Typography variant="h6" noWrap>
+            Welcome, {name}
+          </Typography>
+          <Avatar className={classes.avatar}>A</Avatar>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+      className={classes.drawer}
+      variant="permanent"
+      classes={{
+        paper: classes.drawerPaper,
+      }}
+    >
+      <Toolbar />
+      <div className={classes.drawerContainer}>
+        <List>
+          {/* Add your menu items here */}
+          <ListItem button>
+            <ListItemIcon>
+              {/* Add your icons here */}
+            </ListItemIcon>
+            <ListItemText primary="Home" />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>
+              {/* Add your icons here */}
+            </ListItemIcon>
+            <ListItemText primary="Profile" />
+          </ListItem>
+          <ListItem button>
+            <ListItemIcon>
+              {/* Add your icons here */}
+            </ListItemIcon>
+            <ListItemText primary="Settings" />
+          </ListItem>
+
+        </List>
           <Button
-            variant="contained"
-            color="secondary"
-            onClick={logout}
-            className={classes.button}
-          >
-            Logout
-          </Button>
-        </Paper>
-      </Container>
-    </>
+          variant="contained"
+          className={classes.logoutButton}
+          onClick={logout}
+        >
+          Logout
+        </Button>
+      </div>
+    </Drawer>
+      <main className={classes.content}>
+        <Toolbar />
+        
+          <Paper style={{ padding: 16 }}>
+            <Typography variant="h5" component="h1" gutterBottom>
+              Welcome to your dashboard
+            </Typography>
+            <Typography variant="body1" gutterBottom>
+              This is a protected page
+            </Typography>
+          </Paper>
+  
+      </main>
+    </div>
   );
 }
 
